@@ -952,7 +952,7 @@ function home(){const u=U();const finN=EP.filter((_,i)=>u.fin[i]).length;const n
       <div class="btnrow"><button class="btn ghost" id="pxe">Copy my progress</button><button class="btn ghost" id="pxi">Paste progress</button></div>
       <textarea id="pxt" hidden placeholder="Paste the progress code here"></textarea><div id="pxr" class="small"></div>
     </div></details>
-  ${window.ISPWA?`<div class="note" style="display:flex;flex-direction:column;gap:6px"><b>📥 Use without internet</b><span class="small">Download all lessons to this phone. Then you can learn with no internet. When a new week comes, tap again (it only gets the new files).</span><div class="btnrow"><button class="btn" id="offb">Download all lessons</button></div><div id="offr" class="small"></div></div>`:""}
+  ${window.ISPWA?`<div class="note" style="display:flex;flex-direction:column;gap:6px"><b>📥 Use without internet</b><span class="small">Download all lessons to this phone (about 200 MB, use Wi-Fi). Then you can learn with no internet. When a new week comes, tap again (it only gets the new files).</span><div class="btnrow"><button class="btn" id="offb">Download all lessons</button></div><div id="offr" class="small"></div></div>`:""}
   <p class="small muted">Sound effects <button class="chip" id="fxb" onclick="S.fx=!fxOn();save();this.textContent=fxOn()?'On':'Off'">${fxOn()?"On":"Off"}</button></p>
   ${"speechSynthesis" in window?"":`<p class="note">This browser cannot play sound. Try Chrome or Safari.</p>`}`;}
 
@@ -1689,7 +1689,7 @@ function bindSettings(){const gk=$("#gk");if(!gk)return;
   $("#pxi").onclick=()=>{const t=$("#pxt"),r=$("#pxr");if(t.hidden||!t.value.trim()){t.hidden=false;t.value="";t.focus();r.textContent="Paste the code, then tap “Paste progress” again.";return}
     try{const o=JSON.parse(decodeURIComponent(escape(atob(t.value.trim()))));if(!o||!o.u)throw 0;S.users.chom=Object.assign(blank(),o.u);save();r.innerHTML=`<b style="color:var(--good)">Done! Your progress is here.</b>`;setTimeout(render,800)}catch(e){r.innerHTML=`<b style="color:var(--bad)">This code does not work.</b>`}};const ob=$("#offb");if(ob){offStatus();ob.onclick=offDownload}}
 const OFFC="english-media";let offBusy=false;
-async function offList(){const r=await fetch("media.json",{cache:"no-store"});if(!r.ok)throw 0;return r.json()}
+async function offList(){const r=await fetch("media.json",{cache:"no-store"});if(!r.ok)throw 0;const j=await r.json();return Array.isArray(j)?j:Object.values(j).flat()}
 async function offStatus(){try{const L=await offList(),c=await caches.open(OFFC);let n=0;for(const u of L)if(await c.match(u))n++;const el=$("#offr");if(el&&!offBusy)el.innerHTML=n>=L.length?`<b style="color:var(--good)">✅ All lessons are on this phone.</b>`:`On this phone: ${n} of ${L.length} files.`}catch(e){const el=$("#offr");if(el&&!offBusy)el.textContent=""}}
 async function offDownload(){if(offBusy)return;offBusy=true;const b=$("#offb");if(b)b.disabled=true;try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
   const out=h=>{const el=$("#offr");if(el)el.innerHTML=h};
