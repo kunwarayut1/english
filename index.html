@@ -552,7 +552,7 @@ const NAMES={chom:"Chom",nont:"Nont"};
 const blank=()=>({done:{},acc:{},review:[],lvl:1,sp:1,pts:0,days:[],best:0,clues:{},retell:{},srs:{},miss:{},pos:{},fin:{}});
 let S={profile:"chom",speed:0,users:{chom:blank(),nont:blank()}};
 try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.users){S=Object.assign(S,s);for(const k of ["chom","nont"])S.users[k]=Object.assign(blank(),S.users[k]||{})}}catch(e){}
-try{if(window.SEEDPROG&&!Object.keys((S.users.chom||{}).fin||{}).length){const sd=window.SEEDPROG;S.users.chom=Object.assign(blank(),sd.users.chom);if(sd.speed!=null)S.speed=sd.speed;localStorage.setItem(KEY,JSON.stringify(S))}}catch(e){}
+try{if(window.SEEDPROG&&Object.keys((S.users.chom||{}).fin||{}).length<Object.keys(window.SEEDPROG.users.chom.fin||{}).length){const sd=window.SEEDPROG;S.users.chom=Object.assign(blank(),sd.users.chom);if(sd.speed!=null)S.speed=sd.speed;localStorage.setItem(KEY,JSON.stringify(S))}}catch(e){}
 let CLOUD=null,cloudT=0,cloudBusy=false,cloudAgain=false;
 function save(){S.t=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(CLOUD){clearTimeout(cloudT);cloudT=setTimeout(cloudPush,2500)}}
 async function cloudPush(){if(!CLOUD)return;if(cloudBusy){cloudAgain=true;return}cloudBusy=true;try{const c=Object.assign({},S);delete c.gkey;await CLOUD.set({s:JSON.stringify(c),t:S.t})}catch(e){}cloudBusy=false;if(cloudAgain){cloudAgain=false;cloudPush()}}
@@ -942,10 +942,6 @@ function home(){const u=U();const finN=EP.filter((_,i)=>u.fin[i]).length;const n
 
   <details class="panel"><summary>Settings</summary>
     <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
-      <b class="small">AI grammar check (Gemini key, free)</b>
-      <p class="small muted">${AIREADY?"Inside Claude the AI check already works. ":""}Get a free key at aistudio.google.com → “Get API key”. The key stays on this phone only.</p>
-      <input type="text" id="gk" placeholder="Paste your Gemini API key" value="${esc(S.gkey||"")}" autocomplete="off" autocapitalize="off" spellcheck="false">
-      <div class="btnrow"><button class="btn" id="gks">Save and test</button>${S.gkey?`<button class="btn ghost" id="gkd">Remove key</button>`:""}</div><div id="gkr" class="small"></div>
       <b class="small" style="margin-top:6px">I already studied some lessons</b>
       <p class="small muted">Mark lessons as done and add their words to your review.</p>
       <div class="btnrow"><select id="mdn" style="font:inherit;padding:10px;border-radius:14px;border:2px solid var(--line);background:var(--paper);color:var(--ink)">${EP.map((e,i)=>e.wk<99?`<option value="${i}">${e.code} ${esc(e.t)}</option>`:"").join("")}</select><button class="btn ghost" id="mdb">Mark done up to here</button></div><div id="mdr" class="small"></div>
@@ -1684,7 +1680,7 @@ function dueTest(u){u.tests=u.tests||{};return (typeof WTEST!=="undefined"?WTEST
 
 function bindSettings(){const gk=$("#gk");if(!gk)return;
   const mdb=$("#mdb");if(mdb)mdb.onclick=()=>{const n=+$("#mdn").value,u=U();for(let i=0;i<=n;i++){if(!u.fin[i]){u.fin[i]=true;srsAdd(i)}}save();$("#mdr").innerHTML=`<b style="color:var(--good)">Done! Lessons up to ${EP[n].code} are marked.</b>`;setTimeout(render,900)};
-  $("#gks").onclick=async()=>{S.gkey=gk.value.trim();save();const r=$("#gkr");if(!S.gkey){r.textContent="No key.";return}r.textContent="Testing…";
+  if($("#gks"))$("#gks").onclick=async()=>{S.gkey=gk.value.trim();save();const r=$("#gkr");if(!S.gkey){r.textContent="No key.";return}r.textContent="Testing…";
     const t=await gemini('Reply with JSON only: {"ok":true}');r.innerHTML=t&&t.ok?`<b style="color:var(--good)">It works! The AI will check your sentences.</b>`:`<b style="color:var(--bad)">It did not work. Check the key and your internet.</b>`};
   const d=$("#gkd");if(d)d.onclick=()=>{delete S.gkey;save();render()};
   $("#pxe").onclick=async()=>{const code=btoa(unescape(encodeURIComponent(JSON.stringify({v:1,u:S.users.chom}))));const r=$("#pxr");try{await navigator.clipboard.writeText(code);r.textContent="Copied! Now paste it in the other app."}catch(e){const t=$("#pxt");t.hidden=false;t.value=code;t.select();r.textContent="Select all and copy this code."}};
