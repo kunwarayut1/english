@@ -943,7 +943,7 @@ const okMark=ok=>`<b class="okm ${ok?"ok":"no"}" style="color:var(${ok?"--good":
 /* ---------- home ---------- */
 function home(){const u=U();const finN=EP.filter((_,i)=>u.fin[i]).length;const ni=EP.findIndex((e,i)=>!u.fin[i]&&lessonReady(i)&&e.wk<99);const nx=ni<0?null:EP[ni];const other=S.profile==="chom"?"nont":"chom";
   $("#app").innerHTML=`
-  <div class="hero"><img src="img/celebrate.webp" alt=""><div style="display:flex;flex-direction:column;gap:2px"><span class="eyebrow">Hi Chom! Ready to learn?</span><h1>English</h1></div></div>
+  <div class="hero"><img src="img/hero.webp" alt=""><div style="display:flex;flex-direction:column;gap:2px"><span class="eyebrow">Hi Chom! Ready to learn?</span><h1>English</h1></div></div>
   <section class="panel today">
     <div class="stats"><div class="stat"><b>${streak(u)}</b><span>days in a row</span></div><div class="stat"><b>${Object.keys(u.srs).length}</b><span>words learned</span></div><div class="stat"><b>${finN}/${EP.length}</b><span>lessons done</span></div><div class="stat"><b>${Math.round((u.listenSec||0)/60)}</b><span>minutes of long listening</span></div></div>
     ${dueTest(u)>=0?`<div><span class="eyebrow">Weekly listening check 🏆</span><h2>${esc(WTEST[dueTest(u)].title)}</h2><p class="muted small">You finished week ${WTEST[dueTest(u)].week}. A new story you have never heard. See how much you understand (about 10 min).</p></div><button class="btn big" data-test="${dueTest(u)}" style="align-self:flex-start">Start the check</button>`:nx?`<div><span class="eyebrow">${u.pos[ni]?"Continue":"Next lesson"} · ${nx.code}${u.pos[ni]?` · Page ${u.pos[ni]+1}/${STEPS.length}`:""}</span><h2>${esc(nx.t)}</h2><p class="muted small">3 parts, 30–35 min each. You can rest between parts.</p></div>
