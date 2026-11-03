@@ -942,11 +942,8 @@ function home(){const u=U();const finN=EP.filter((_,i)=>u.fin[i]).length;const n
 
   <details class="panel"><summary>Settings</summary>
     <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
-      <b class="small" style="margin-top:6px">I already studied some lessons</b>
-      <p class="small muted">Mark lessons as done and add their words to your review.</p>
-      <div class="btnrow"><select id="mdn" style="font:inherit;padding:10px;border-radius:14px;border:2px solid var(--line);background:var(--paper);color:var(--ink)">${EP.map((e,i)=>e.wk<99?`<option value="${i}">${e.code} ${esc(e.t)}</option>`:"").join("")}</select><button class="btn ghost" id="mdb">Mark done up to here</button></div><div id="mdr" class="small"></div>
-      <b class="small" style="margin-top:6px">Move my progress</b>
-      <p class="small muted">Copy your progress here, then paste it in the app on your home screen (or the other way).</p>
+      <b class="small">Backup my progress</b>
+      <p class="small muted">Once in a while, tap Copy and save the code (for example in LINE Keep). If you change phone or lose your data, tap Paste to get everything back.</p>
       <div class="btnrow"><button class="btn ghost" id="pxe">Copy my progress</button><button class="btn ghost" id="pxi">Paste progress</button></div>
       <textarea id="pxt" hidden placeholder="Paste the progress code here"></textarea><div id="pxr" class="small"></div>
     </div></details>
