@@ -561,7 +561,9 @@ let S={profile:"chom",speed:0,users:{chom:blank(),nont:blank()}};
 try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.users){S=Object.assign(S,s);for(const k of ["chom","nont"])S.users[k]=Object.assign(blank(),S.users[k]||{})}}catch(e){}
 try{if(window.SEEDPROG&&Object.keys((S.users.chom||{}).fin||{}).length<Object.keys(window.SEEDPROG.users.chom.fin||{}).length){const sd=window.SEEDPROG;S.users.chom=Object.assign(blank(),sd.users.chom);if(sd.speed!=null)S.speed=sd.speed;localStorage.setItem(KEY,JSON.stringify(S))}}catch(e){}
 let CLOUD=null,cloudT=0,cloudBusy=false,cloudAgain=false;
-setInterval(()=>{try{if(document.hidden||view.ep==null||!document.querySelector("#stage"))return;const u=U();u.tm=u.tm||{};u.tm[view.ep]=(u.tm[view.ep]||0)+15}catch(_){}},15000);
+let lastAct=Date.now();const _mels=new Set();["pointerdown","keydown","input","touchstart","scroll"].forEach(ev=>addEventListener(ev,()=>lastAct=Date.now(),{capture:true,passive:true}));{const _p=HTMLMediaElement.prototype.play;HTMLMediaElement.prototype.play=function(){_mels.add(this);lastAct=Date.now();return _p.apply(this,arguments)}}
+const isActive=()=>{for(const m of _mels){if(!m.paused&&!m.ended){lastAct=Date.now();return true}if(m.paused)_mels.delete(m)}return Date.now()-lastAct<120000};
+setInterval(()=>{try{if(document.hidden||view.ep==null||!document.querySelector("#stage")||!isActive())return;const u=U();u.tm=u.tm||{};u.tm[view.ep]=(u.tm[view.ep]||0)+15}catch(_){}},15000);
 const tmTxt=i=>{const m=Math.round(((U().tm||{})[i]||0)/60);return m?`<p class="small muted">⏱ Time on this lesson so far: ${m>=60?Math.floor(m/60)+" h "+(m%60)+" min":m+" min"}</p>`:""};
 function save(){S.t=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}ghSoon();if(CLOUD){clearTimeout(cloudT);cloudT=setTimeout(cloudPush,2500)}}
 const GHREPO="kunwarayut1/english-progress",GHFILE="progress.json";let ghSha=null,ghT=0,ghBusy=false,ghAgain=false,ghState="";
