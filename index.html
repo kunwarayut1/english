@@ -950,7 +950,7 @@ for(const k of ["chom","nont"]){const x=S.users[k];for(const w in (x.srs||{}))if
 function addDays(str,n){const [y,m,d]=str.split("-").map(Number);const x=new Date(y,m-1,d+n);return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0")}
 function srsAdd(i){const u=U();EP[i].vocab.forEach(v=>{if(!u.srs[v[0]])u.srs[v[0]]={box:0,due:addDays(today(),1)}});save()}
 const REVMAX=12;function srsDue(u){const t=today();return Object.keys(u.srs).filter(w=>u.srs[w].due<=t)}
-function srsGrade(w,ok){const s=U().srs[w];if(!s)return;s.box=ok?Math.min(s.box+1,GAPS.length-1):0;s.due=addDays(today(),ok?GAPS[s.box]:1);save()}
+function srsGrade(w,ok){const s=U().srs[w];if(!s)return;s.box=ok?Math.min(s.box+1,GAPS.length-1):0;s.due=addDays(today(),ok?GAPS[s.box]:1);s.last=today();save()}
 function hardReview(box,done){const u=U();u.hard=u.hard||[];u.hardS=u.hardS||{};const td=today();
   const due=u.hard.filter(h=>{const r=u.hardS[h[0]];return !r||r.due<=td}).slice(0,3);
   if(!due.length){done("");return}
@@ -972,7 +972,9 @@ function hardReview(box,done){const u=U();u.hard=u.hard||[];u.hardS=u.hardS||{};
       else{const ref=sayNorm(h[0]);res(`<div class="note"><b style="color:var(--bad)">Not quite.</b><div class="small" style="margin-top:6px">${ref.map((w,j)=>r.hit[j]?esc(w):`<span style="font-weight:700;text-decoration:underline">${esc(w)}</span>`).join(" ")}</div><div class="small muted" style="margin-top:4px">Underlined = missing or different. Try again, or tap Show answer.</div></div>`)}};
     hy.onkeydown=ev=>{if(ev.key==="Enter")$("#hk").onclick()}};
   draw()}
-function review(){const u=U();let q=shuf(srsDue(u).sort((x,y)=>(u.srs[x].box-u.srs[y].box)||(u.srs[x].due<u.srs[y].due?-1:1)).slice(0,REVMAX));const total=q.length,retried=new Set();let right=0;const t=T();
+function review(){const u=U();const byWeak=(x,y)=>(u.srs[x].box-u.srs[y].box)||(u.srs[x].due<u.srs[y].due?-1:1);let q=srsDue(u).sort(byWeak).slice(0,REVMAX);const extra=new Set();
+  if(q.length<8){const td=today();Object.keys(u.srs).filter(w=>VMAP[w]&&!q.includes(w)&&u.srs[w].due>td&&u.srs[w].last!==td).sort(byWeak).slice(0,8-q.length).forEach(w=>{q.push(w);extra.add(w)})}
+  q=shuf(q);const total=q.length,retried=new Set();let right=0;const t=T();
   const onx=document.querySelector(".btnrow [data-next]");const lockR=()=>{if(onx&&!t.revDone){onx.disabled=true;onx.title="Finish Review first"}};lockR();
   const allDone=(msg)=>{t.revDone=true;if(onx){onx.disabled=false;onx.title=""}rs.hidden=false;rs.innerHTML=msg+`<div class="btnrow"><button class="btn" data-next>Next</button></div>`};
   $("#stage").innerHTML=`<div id="rs" style="display:flex;flex-direction:column;gap:12px"></div>`;
@@ -981,7 +983,7 @@ function review(){const u=U();let q=shuf(srsDue(u).sort((x,y)=>(u.srs[x].box-u.s
   const next=()=>{if(!q.length){if(total)addPts(right,u);hardReview(rs,res=>allDone(wordMsg()+res));return}
     const w=q.shift(),info=VMAP[w];if(!info)return next();const v=info.v;
     const head=`<div class="bar"><i style="width:${Math.round(100*(total-q.length-1)/Math.max(total,1))}%"></i></div><span class="eyebrow">${retried.has(w)?"Try again · ":""}Review: type the English word</span>`;
-    recallCard(rs,v,head,(isClean)=>{if(!retried.has(w)){srsGrade(w,isClean);if(isClean)right++;else{retried.add(w);q.push(w);if(!u.review.some(r=>r[0]===w)){u.review.push([w,v[1]]);save()}}}next()})};
+    recallCard(rs,v,head,(isClean)=>{if(!retried.has(w)){if(extra.has(w)){if(!isClean)srsGrade(w,false);else u.srs[w].last=today()}else srsGrade(w,isClean);if(isClean)right++;else{retried.add(w);q.push(w);if(!u.review.some(r=>r[0]===w)){u.review.push([w,v[1]]);save()}}}next()})};
   next();}
 
 function missionHTML(i){const e=EP[i],u=U();if(!e.mission)return"";
