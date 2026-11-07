@@ -1211,20 +1211,20 @@ function stepWork(e,i,P){const st=$("#stage"),u=U(),W=(typeof WORK!=="undefined"
   u.work=u.work||{};if(u.work[i])t.workDone=true;
   const unlock=()=>{t.workDone=true;if(W&&!u.work[i]){u.work[i]=1;save()}if(nx){nx.disabled=false;nx.title=""}};
   if(!W){st.innerHTML=`<p class="muted">No work scene for this lesson.</p>`;unlock();return}
-  const s=t.wk||(t.wk={ph:0,heard:{},q:0,sayk:0,role:0,v:3,ok:{}});if(s.v!==3){s.ok={};s.v=3}s.ph=P;
+  u.wk=u.wk||{};const s=u.wk[i]||(u.wk[i]={ph:0,heard:{},q:0,sayk:0,role:0,v:3,ok:{}});s.ph=P;
   const HERO=W.lines.some(l=>l[0]==="Fern")?"Fern":"Nam";
-  const pageOK=()=>{s.ok[P]=1;if(nx){nx.disabled=false;nx.title=""}};
+  const pageOK=()=>{s.ok[P]=1;save();if(nx){nx.disabled=false;nx.title=""}};
   if(nx&&!t.workDone&&!s.ok[P]){nx.disabled=true;nx.title="Finish this page first"}
   const head=()=>`<span class="eyebrow">At work · ${esc(W.t)}</span><h3 style="margin:2px 0">${esc(W.th)}</h3>`;
   const lvl=l=>`<span class="chip" style="font-size:.75rem;padding:2px 8px">${esc(l)}</span>`;
-  function draw(){
+  function draw(){save();
     if(s.ph===0){const all=W.w.every((w,k)=>s.heard[k]);
       st.innerHTML=`${head()}<div class="note">${esc(W.ctx)}</div>${W.l&&W.l.length?`<div class="word" style="gap:4px;border:2px dashed var(--accent)"><b class="small">🔗 From today's lesson — now at work</b>${W.l.map(x=>`<div class="small"><b>${esc(x[0])}</b> · ${esc(x[1])}</div>`).join("")}</div>`:""}<p class="small muted">Learn these work words first. Tap ▶ on every word.</p>
       ${W.w.map((w,k)=>`<div class="word" style="gap:6px">${pic(w[0],1)}<div class="btnrow" style="flex-wrap:nowrap;align-items:center"><button class="play" data-wk="${k}" aria-label="Listen">${ICON}</button><b style="font-size:1.15rem">${esc(w[0])}</b>${lvl(w[2])}${s.heard[k]?`<span style="color:var(--good)">✓</span>`:""}</div><div>${esc(w[1])}</div><div class="small">${playBtn(w[3],"Listen","Hannah")} ${esc(w[3])}</div>${w[4]?`<div class="small muted">${esc(w[4])}</div>`:""}</div>`).join("")}
       `;
       st.querySelectorAll("[data-wk]").forEach(b=>b.onclick=()=>{const k=+b.dataset.wk;s.heard[k]=1;sayOne(W.w[k][0],"Hannah");setTimeout(draw,50)});
       if(all)pageOK();return}
-    if(s.ph===1){st.innerHTML=head();const ans=t.wans||(t.wans={});let show=null;
+    if(s.ph===1){st.innerHTML=head();const ans=s.wans||(s.wans={});let show=null;
       storyPlayer(st,W.lines.map(l=>[l[0],l[1],l[2]]),{onHeard:()=>{s.played=1;show&&show()}});
       const qs=W.q.map(q=>[q[0],q[2],q[3],q[4]]);let n=0;
       show=quizBlock(st,qs,Q=>Q[3]!=null?W.lines[Q[3]]:null,ok=>{n++;if(ok)addPts(2,u);if(n>=qs.length)pageOK()});
@@ -1236,13 +1236,13 @@ function stepWork(e,i,P){const st=$("#stage"),u=U(),W=(typeof WORK!=="undefined"
         $("#wda").onclick=()=>{s.dacc=null;draw()};pageOK();return}
       st.innerHTML=`${head()}<p>Now catch the key sentences one by one. These are the sentences with the answers.</p><div class="btnrow"><span style="flex:1"></span><button class="btn" id="wds">Start dictation</button></div>`;
       $("#wds").onclick=()=>stepDict({lines:W.lines,dict:D},i,{done:acc=>{s.dacc=acc;draw();scrollTo(0,0)}});return}
-    if(s.ph===3){st.innerHTML=`${head()}<div class="btnrow"><button class="btn" id="wpl">Play whole scene</button><button class="btn ghost" id="wsl">🐢 Slow</button><button class="btn ghost" id="wst">Stop</button><label class="small" style="display:inline-flex;gap:6px;align-items:center"><input type="checkbox" id="wth" ${t.wth?"checked":""}> Show Thai</label></div>
-      <div id="sc">${W.lines.map((l,k)=>`<div class="line" data-l="${k}"><button class="play" data-line="${k}" aria-label="Listen to this sentence">${ICON}</button><span class="who">${esc(l[0])}${l[0]===HERO?" (you)":""}</span><span class="en">${KW(l[1])}<div class="tr" ${t.wth?"":"hidden"}>${esc(l[2])}</div></span></div>`).join("")}</div>`;
+    if(s.ph===3){st.innerHTML=`${head()}<div class="btnrow"><button class="btn" id="wpl">Play whole scene</button><button class="btn ghost" id="wsl">🐢 Slow</button><button class="btn ghost" id="wst">Stop</button><label class="small" style="display:inline-flex;gap:6px;align-items:center"><input type="checkbox" id="wth" ${s.wth?"checked":""}> Show Thai</label></div>
+      <div id="sc">${W.lines.map((l,k)=>`<div class="line" data-l="${k}"><button class="play" data-line="${k}" aria-label="Listen to this sentence">${ICON}</button><span class="who">${esc(l[0])}${l[0]===HERO?" (you)":""}</span><span class="en">${KW(l[1])}<div class="tr" ${s.wth?"":"hidden"}>${esc(l[2])}</div></span></div>`).join("")}</div>`;
       const mark=k=>st.querySelectorAll(".line").forEach(x=>x.classList.toggle("now",+x.dataset.l===k));
       const all=r=>playLines(W.lines.map(l=>[l[0],l[1]]),mark,()=>{s.scr=1;pageOK()},r);
       $("#wpl").onclick=()=>all();$("#wsl").onclick=()=>all("slow");$("#wst").onclick=()=>{stop();mark(-1)};
       st.querySelectorAll("[data-line]").forEach(b=>b.onclick=()=>{const k=+b.dataset.line;mark(k);sayOne(W.lines[k][1],W.lines[k][0])});
-      $("#wth").onchange=ev=>{t.wth=ev.target.checked;st.querySelectorAll(".tr").forEach(x=>x.hidden=!t.wth)};
+      $("#wth").onchange=ev=>{s.wth=ev.target.checked;st.querySelectorAll(".tr").forEach(x=>x.hidden=!s.wth)};
       if(s.scr)pageOK();return}
     if(s.ph===4){const k=s.sayk,it=W.s[k];
       if(k>=W.s.length){st.innerHTML=`${head()}<p><b style="color:var(--good)">✓ All ${W.s.length} lines done.</b></p><div class="btnrow"><button class="btn ghost" id="wsa">Practise again</button></div>`;$("#wsa").onclick=()=>{s.sayk=0;draw()};pageOK();return}
