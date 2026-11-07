@@ -1007,7 +1007,7 @@ function home(){const u=U();const finN=EP.filter((_,i)=>u.fin[i]).length;const n
   <section class="panel today">
     <div class="stats"><div class="stat"><b>${streak(u)}</b><span>days in a row</span></div><div class="stat"><b>${Object.keys(u.srs).length}</b><span>words learned</span></div><div class="stat"><b>${finN}/${EP.length}</b><span>lessons done</span></div><div class="stat"><b>${Math.round((u.listenSec||0)/60)}</b><span>minutes of long listening</span></div></div>
     ${dueTest(u)>=0?`<div><span class="eyebrow">Weekly listening check 🏆</span><h2>${esc(WTEST[dueTest(u)].title)}</h2><p class="muted small">You finished week ${WTEST[dueTest(u)].week}. A new story you have never heard. See how much you understand (about 10 min).</p></div><button class="btn big" data-test="${dueTest(u)}" style="align-self:flex-start">Start the check</button>`:nx?`<div><span class="eyebrow">${u.pos[ni]?"Continue":"Next lesson"} · ${nx.code}${u.pos[ni]?` · Page ${u.pos[ni]+1}/${nSteps(ni)}`:""}</span><h2>${esc(nx.t)}</h2><p class="muted small">${nSteps(ni)>16?"4 parts":"3 parts"}, about 20–35 min each. You can rest between parts.</p></div>
-    <button class="btn big" data-ep="${ni}" style="align-self:flex-start">${u.pos[ni]?"Continue":"Start"}</button>${window.ISPWA?dlBox(ni):""}`:`<h2>All lessons done!</h2><p class="small muted">New lessons are coming soon.</p>`}
+    <button class="btn big" data-ep="${ni}" style="align-self:flex-start">${u.pos[ni]?"Continue":"Start"}</button>`:`<h2>All lessons done!</h2><p class="small muted">New lessons are coming soon.</p>`}
   </section>
 
   ${mapHTML(u)}
@@ -1021,7 +1021,7 @@ function home(){const u=U();const finN=EP.filter((_,i)=>u.fin[i]).length;const n
       ${window.ISPWA?`<b class="small">Save progress to GitHub</b><p class="small muted">${S.ghtok?"Your progress saves to GitHub by itself after each step.":"Paste your GitHub key once. Then progress saves by itself, and you never lose it."}</p>${S.ghtok?`<div id="ghst" class="small">${ghState||"Connected."}</div>`:`<input type="password" id="ghk" placeholder="Paste GitHub key (github_pat_...)" autocomplete="off" autocapitalize="off" spellcheck="false"><div class="btnrow"><button class="btn" id="ghs">Save key</button></div><div id="ghst" class="small"></div>`}`:""}
       
     </div></details>
-  ${window.ISPWA&&Object.keys(dlGet()).length?`<div class="note" style="display:flex;flex-direction:column;gap:6px"><b>📥 On this phone</b><div id="dll" style="display:flex;flex-direction:column;gap:6px">${dlListHTML()}</div></div>`:""}
+  ${window.ISPWA&&ni>=0?dlBox(ni):""}
   <p class="small muted">Sound effects <button class="chip" id="fxb" onclick="S.fx=!fxOn();save();this.textContent=fxOn()?'On':'Off'">${fxOn()?"On":"Off"}</button></p>
   ${"speechSynthesis" in window?"":`<p class="note">This browser cannot play sound. Try Chrome or Safari.</p>`}`;}
 
