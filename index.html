@@ -1533,7 +1533,7 @@ function stepSpeak(e,i){const st=$("#stage"),u=U();u.hard=u.hard||[];let k=0,tri
     st.innerHTML=`
     <div class="note" style="display:flex;flex-direction:column;gap:8px"><b>🎧 Hands-free shadowing <span class="small muted">(no mic needed)</span></b>
       <span class="small">The app plays each sentence, then stops so you can say it out loud. Copy the speed and the music of the voice.</span>
-      <span class="small muted">Each sentence 3 times: slow → normal → normal. Say it every time.</span>
+      <span class="small muted">Each sentence 2 times: slow → normal. Say it every time.</span>
       <div class="btnrow">${shOn?`<button class="btn big" id="shx">■ Stop</button>`:`<button class="btn big" id="shg">▶ Start${k>0?` from sentence ${k+1}`:""}</button>${k>0?`<button class="btn ghost" id="sh0">From the start</button>`:""}`}</div><div id="shs" class="small"></div></div>
     <div class="bar"><i style="width:${Math.round(100*(k+1)/e.lines.length)}%"></i></div>
     <span class="eyebrow">Sentence ${k+1}/${e.lines.length} · ${who}</span>
