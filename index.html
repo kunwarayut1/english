@@ -1254,9 +1254,12 @@ function stepWork(e,i,P){const st=$("#stage"),u=U(),W=(typeof WORK!=="undefined"
       const yt=$("#yt"),res=h=>$("#yr").innerHTML=h;
       const pass=v=>{addPts(3,u);res(`<div class="note"><b style="color:var(--good)">✅ Correct!</b><div class="small" style="margin-top:4px">You said: “${esc(v)}”</div><div class="btnrow" style="flex-wrap:nowrap;margin-top:6px">${playBtn(it[0],"Listen",HERO)}<span>${esc(it[0])}</span></div><div class="small" style="margin-top:6px">Say it out loud 2 times.</div><div class="btnrow"><span style="flex:1"></span><button class="btn" id="yn">${k<W.s.length-1?"Next line":"Done"}</button></div></div>`);sayOne(it[0],HERO);$("#yn").onclick=()=>{s.sayk++;draw()}};
       $("#ya").onclick=()=>{res(`<div class="note"><b>Answer</b><div class="btnrow" style="flex-wrap:nowrap;margin-top:6px">${playBtn(it[0],"Listen",HERO)}<span>${esc(it[0])}</span></div><div class="small" style="margin-top:6px">Now type it or say it yourself, then tap Check.</div></div>`);sayOne(it[0],HERO);yt.value="";yt.focus()};
-      $("#yc").onclick=()=>{const v=yt.value.trim();if(!v){yt.focus();return}const got=sayNorm(v);let best=null;
-        for(const a of alts){const r=sayAlign(sayNorm(a),got);if(!best||r.cost<best.cost)best=Object.assign(r,{a})}
-        if(best.cost<0.95){pass(v)}else{const ref=sayNorm(best.a);res(`<div class="note"><b style="color:var(--bad)">Not quite.</b><div class="small" style="margin-top:6px">Closest answer: ${ref.map((w,j)=>best.hit[j]?`<span>${esc(w)}</span>`:`<span style="font-weight:700;text-decoration:underline">${esc(w)}</span>`).join(" ")}</div><div class="small muted" style="margin-top:4px">Underlined = missing or different. Try again.</div></div>`)}};
+      $("#yc").onclick=()=>{const v=yt.value.trim();if(!v){yt.focus();return}
+        const NM=new Set(W.lines.map(l=>l[0]).concat(Object.keys(typeof CAST!=="undefined"?CAST:{})).flatMap(n=>String(n).toLowerCase().replace(/[^a-z ]/g," ").split(/\s+/)).filter(x=>x&&x!=="i"&&x!=="a"&&x.length>1));
+        const dn=arr=>arr.filter(w=>!NM.has(w)&&!(w.length===1&&w!=="i"&&w!=="a"));
+        const got=dn(sayNorm(v));let best=null;
+        for(const a of alts){const r=sayAlign(dn(sayNorm(a)),got);if(!best||r.cost<best.cost)best=Object.assign(r,{a})}
+        if(best.cost<0.95){pass(v)}else{const ref=dn(sayNorm(best.a));res(`<div class="note"><b style="color:var(--bad)">Not quite.</b><div class="small" style="margin-top:6px">Closest answer: ${ref.map((w,j)=>best.hit[j]?`<span>${esc(w)}</span>`:`<span style="font-weight:700;text-decoration:underline">${esc(w)}</span>`).join(" ")}</div><div class="small muted" style="margin-top:4px">Underlined = missing or different. Try again.</div></div>`)}};
       yt.onkeydown=ev=>{if(ev.key==="Enter")$("#yc").onclick()};return}
     if(s.ph===5){const R=W.rp||[],n=s.role;
       if(n>=R.length){if(!u.work[i]){addPts(5,u);W.w.forEach(w=>{if(VMAP[w[0]]&&!u.srs[w[0]])u.srs[w[0]]={box:0,due:addDays(today(),1)}})}save();unlock();pageOK();
