@@ -1187,8 +1187,8 @@ function stepWork(e,i){const st=$("#stage"),u=U(),W=(typeof WORK!=="undefined")&
   const unlock=()=>{t.workDone=true;if(W&&!u.work[i]){u.work[i]=1;save()}if(nx){nx.disabled=false;nx.title=""}};
   if(!W){st.innerHTML=`<p class="muted">No meeting for this lesson.</p>`;unlock();return}
   lock();if(t.workDone){unlock()}
-  const s=t.wk||(t.wk={ph:t.workDone?5:0,heard:{},q:0,sayk:0,role:0});
-  const bar=()=>`<div class="btnrow" style="gap:6px;flex-wrap:wrap">${["Words","Listen","Script","Say it","Role-play"].map((x,k)=>`<span class="chip${k<s.ph?" done":""}" style="${k===s.ph?"outline:2px solid var(--accent)":""}">${k<s.ph?"✓ ":""}${x}</span>`).join("")}</div>`;
+  const s=t.wk||(t.wk={ph:t.workDone?6:0,heard:{},q:0,sayk:0,role:0,v:2});if(!s.v){if(s.ph>=2)s.ph++;s.v=2}
+  const bar=()=>`<div class="btnrow" style="gap:6px;flex-wrap:wrap">${["Words","Listen","Dictation","Script","Say it","Role-play"].map((x,k)=>`<span class="chip${k<s.ph?" done":""}" style="${k===s.ph?"outline:2px solid var(--accent)":""}">${k<s.ph?"✓ ":""}${x}</span>`).join("")}</div>`;
   const head=()=>`<span class="eyebrow">At work · ${esc(W.t)}</span><h3 style="margin:2px 0">${esc(W.th)}</h3>${bar()}`;
   const go=p=>{stop();s.ph=p;draw();scrollTo(0,0)};
   const lvl=l=>`<span class="chip" style="font-size:.75rem;padding:2px 8px">${esc(l)}</span>`;
@@ -1202,7 +1202,7 @@ function stepWork(e,i){const st=$("#stage"),u=U(),W=(typeof WORK!=="undefined")&
     if(s.ph===1){const qs=W.q;const sh=t.wqs||(t.wqs=qs.map(q=>shuf(q[2].map((o,k)=>k))));
       st.innerHTML=`${head()}<p>Listen to the meeting. No script yet. Then answer.</p><div class="btnrow"><button class="btn" id="wpl">▶ Play the meeting</button><button class="btn ghost" id="wst">Stop</button></div>
       <div id="wq" ${s.played?"":"hidden"}>${qs.map((q,n)=>`<div class="word" style="gap:6px"><b>${n+1}. ${esc(q[0])}</b><div class="small muted">${esc(q[1])}</div><div class="opts">${sh[n].map(k=>`<button class="opt" data-q="${n}" data-o="${k}">${esc(q[2][k])}</button>`).join("")}</div><div data-qr="${n}"></div></div>`).join("")}</div>
-      <div class="btnrow"><span style="flex:1"></span><button class="btn" id="wgo" disabled>Next: script</button></div>`;
+      <div class="btnrow"><span style="flex:1"></span><button class="btn" id="wgo" disabled>Next: dictation</button></div>`;
       const ans=t.wans||(t.wans={});
       const chk=()=>{if(qs.every((q,n)=>ans[n]!=null))$("#wgo").disabled=false};
       $("#wpl").onclick=()=>{playLines(W.lines.map(l=>[l[0],l[1]]),null,()=>{s.played=1;$("#wq").hidden=false})};
@@ -1211,7 +1211,14 @@ function stepWork(e,i){const st=$("#stage"),u=U(),W=(typeof WORK!=="undefined")&
         st.querySelectorAll(`[data-q="${n}"]`).forEach(x=>{x.disabled=true;if(+x.dataset.o===qs[n][3])x.classList.add("right");else if(x===b)x.classList.add("wrong")});
         const EL=qs[n][4]!=null?W.lines[qs[n][4]]:null;st.querySelector(`[data-qr="${n}"]`).innerHTML=(ok?`<span style="color:var(--good)">✓ Right!</span>`:`<span style="color:var(--bad)">✗ The answer is: ${esc(qs[n][2][qs[n][3]])}</span>`)+(EL?`<div class="note" style="margin-top:6px">You can hear it here:<div class="btnrow" style="margin-top:6px;flex-wrap:nowrap;align-items:flex-start">${playBtn(EL[1],"Listen",EL[0])}<span><b>${esc(EL[0])}:</b> ${esc(EL[1])}<div class="small muted">${esc(EL[2])}</div></span></div></div>`:"");if(ok)addPts(2,u);chk()});
       chk();$("#wgo").onclick=()=>go(2);return}
-    if(s.ph===2){st.innerHTML=`${head()}<p>Read and listen. Tap a line to hear it again.</p><div class="btnrow"><button class="btn" id="wpl">▶ Play all</button><button class="btn ghost" id="wsl">🐢 Slow</button><button class="btn ghost" id="wth">Show Thai</button></div>
+    if(s.ph===2){const dl=[];const nw=k=>W.lines[k][1].split(/\s+/).length;W.q.forEach(q=>{if(q[4]!=null&&!dl.includes(q[4])&&W.lines[q[4]]&&nw(q[4])<=22)dl.push(q[4])});
+      W.lines.map((l,k)=>k).filter(k=>!dl.includes(k)&&nw(k)>=5&&nw(k)<=16).sort((x,y)=>nw(y)-nw(x)).forEach(k=>{if(dl.length<3)dl.push(k)});
+      const D=dl.slice(0,3).sort((x,y)=>x-y);
+      if(s.dacc!=null){st.innerHTML=`${head()}<p>Dictation done: <b>${s.dacc}%</b></p><div class="btnrow"><button class="btn ghost" id="wda">Try again</button><span style="flex:1"></span><button class="btn" id="wgo">Next: script</button></div>`;
+        $("#wda").onclick=()=>{s.dacc=null;draw()};$("#wgo").onclick=()=>go(3);return}
+      st.innerHTML=`${head()}<p>Now catch the key sentences one by one. These are the sentences with the answers.</p><div class="btnrow"><span style="flex:1"></span><button class="btn" id="wds">Start dictation</button></div>`;
+      $("#wds").onclick=()=>stepDict({lines:W.lines,dict:D},i,{done:acc=>{s.dacc=acc;draw();scrollTo(0,0)}});return}
+    if(s.ph===3){st.innerHTML=`${head()}<p>Read and listen. Tap a line to hear it again.</p><div class="btnrow"><button class="btn" id="wpl">▶ Play all</button><button class="btn ghost" id="wsl">🐢 Slow</button><button class="btn ghost" id="wth">Show Thai</button></div>
       <div id="wsc" style="display:flex;flex-direction:column;gap:8px">${W.lines.map((l,k)=>`<div class="word" data-ln="${k}" style="gap:2px;cursor:pointer"><b class="small" style="color:${l[0]==="Nam"?"var(--accent)":"var(--muted)"}">${esc(l[0])}${l[0]==="Nam"?" (you)":""}</b><div>${KW(l[1])}</div><div class="small muted wth" ${t.wth?"":"hidden"}>${esc(l[2])}</div></div>`).join("")}</div>
       <div class="btnrow"><span style="flex:1"></span><button class="btn" id="wgo" ${s.scr?"":"disabled"}>Next: say it</button></div>`;
       const hl=k=>st.querySelectorAll("[data-ln]").forEach(x=>x.style.outline=+x.dataset.ln===k?"2px solid var(--accent)":"");
@@ -1219,9 +1226,9 @@ function stepWork(e,i){const st=$("#stage"),u=U(),W=(typeof WORK!=="undefined")&
       $("#wpl").onclick=()=>all();$("#wsl").onclick=()=>all("slow");
       $("#wth").onclick=()=>{t.wth=!t.wth;st.querySelectorAll(".wth").forEach(x=>x.hidden=!t.wth)};
       st.querySelectorAll("[data-ln]").forEach(x=>x.onclick=ev=>{if(ev.target.closest("button"))return;const l=W.lines[+x.dataset.ln];hl(+x.dataset.ln);sayOne(l[1],l[0])});
-      $("#wgo").onclick=()=>go(3);return}
-    if(s.ph===3){const k=s.sayk,it=W.s[k];
-      if(k>=W.s.length){go(4);return}
+      $("#wgo").onclick=()=>go(4);return}
+    if(s.ph===4){const k=s.sayk,it=W.s[k];
+      if(k>=W.s.length){go(5);return}
       const alts=[it[0]].concat(it[2]);
       st.innerHTML=`${head()}<div class="bar"><i style="width:${Math.round(100*k/W.s.length)}%"></i></div><span class="eyebrow">Your line ${k+1}/${W.s.length}</span>
       <div style="font-size:1.2rem;font-weight:700">${esc(it[1])}</div>
@@ -1234,8 +1241,8 @@ function stepWork(e,i){const st=$("#stage"),u=U(),W=(typeof WORK!=="undefined")&
         for(const a of alts){const r=sayAlign(sayNorm(a),got);if(!best||r.cost<best.cost)best=Object.assign(r,{a})}
         if(best.cost<0.95){pass(v)}else{const ref=sayNorm(best.a);res(`<div class="note"><b style="color:var(--bad)">Not quite.</b><div class="small" style="margin-top:6px">Closest answer: ${ref.map((w,j)=>best.hit[j]?`<span>${esc(w)}</span>`:`<span style="font-weight:700;text-decoration:underline">${esc(w)}</span>`).join(" ")}</div><div class="small muted" style="margin-top:4px">Underlined = missing or different. Try again.</div></div>`)}};
       yt.onkeydown=ev=>{if(ev.key==="Enter")$("#yc").onclick()};return}
-    if(s.ph===4){const R=W.rp||[],n=s.role;
-      if(n>=R.length){s.ph=5;addPts(5,u);W.w.forEach(w=>{if(VMAP[w[0]]&&!u.srs[w[0]])u.srs[w[0]]={box:0,due:addDays(today(),1)}});save();unlock();draw();return}
+    if(s.ph===5){const R=W.rp||[],n=s.role;
+      if(n>=R.length){s.ph=6;addPts(5,u);W.w.forEach(w=>{if(VMAP[w[0]]&&!u.srs[w[0]])u.srs[w[0]]={box:0,due:addDays(today(),1)}});save();unlock();draw();return}
       const it=R[n],Q=W.lines[it[0]],M=W.lines[it[0]+1];const rs=s.rs||(s.rs={});const r=rs[n]||(rs[n]={txt:"",done:0,help:0,hint:0,thq:0,tiles:null,pick:[]});
       const nrm=x=>" "+String(x).toLowerCase().replace(/[’]/g,"'").replace(/,/g,"").replace(/[^a-z0-9' \-]/g," ").split(/\s+/).filter(Boolean).join(" ")+" ";
       const miss=v=>{const a=nrm(v);return it[2].filter(g=>!g.some(x=>a.includes(" "+nrm(x).trim())))};
@@ -1275,7 +1282,7 @@ function stepWork(e,i){const st=$("#stage"),u=U(),W=(typeof WORK!=="undefined")&
           if(got===want){r.txt=r.pick.map(j=>r.tiles[j]).join(" ");finish(true)}else res(`<div class="note"><b style="color:var(--bad)">Not quite.</b> Check the word order and try again.</div>`)}}
       return}
     st.innerHTML=`${head()}<h3>Meeting done! 🎉</h3><p class="small muted">The ${W.w.length} work words are now in your Review.</p><div class="btnrow"><button class="btn ghost" id="wag">Role-play again</button></div>`;
-    $("#wag").onclick=()=>{s.ph=4;s.role=0;s.rs={};draw()}}
+    $("#wag").onclick=()=>{s.ph=5;s.role=0;s.rs={};draw()}}
   draw();}
 
 function stepMission(e,i){const st=$("#stage");if(!e.mission){st.innerHTML=`<p class="muted">No mission in this lesson. Tap “Finish lesson”.</p>`;return}
@@ -1407,8 +1414,8 @@ function renderX2(e,box){const x=e.x2;if(!x)return;
     $("#xf").innerHTML=`<div class="note">${okMark(ok)}<div style="margin-top:6px"><b>${x.who}:</b> ${esc(x.text)}</div><div class="small muted">${esc(x.th)}</div></div>`})}
 
 /* 4. dictation */
-function stepDict(e,i){const st=$("#stage");const rs=roots(i);const u=U();const lvl=u.lvl;let k=0;const res=[];
-  const fin=()=>{const acc=Math.round(res.reduce((a,b)=>a+b,0)/res.length);u.acc[i]=acc;addPts(Math.round(acc/10),u);let msg;
+function stepDict(e,i,opt){const st=$("#stage");const rs=roots(i);const u=U();const lvl=u.lvl;let k=0;const res=[];
+  const fin=()=>{const acc=Math.round(res.reduce((a,b)=>a+b,0)/res.length);if(opt){addPts(Math.round(acc/20),u);save();return opt.done(acc)}u.acc[i]=acc;addPts(Math.round(acc/10),u);let msg;
     const prevAcc=Object.keys(u.acc).map(Number).filter(j=>j<i).sort((a,b)=>b-a).map(j=>u.acc[j])[0];if(acc>=85&&u.lvl<3&&prevAcc>=85){u.lvl++;msg=`Good job! 2 lessons in a row. Dictation moves up to “${LV[u.lvl]}”.`}
     else if(acc<50&&u.lvl>1){u.lvl--;msg=`Next lesson goes back to “${LV[u.lvl]}” for more practice.`}
     else if(acc>=85&&u.lvl<3)msg=`Great! 1 of 2 done. Get 85% again next lesson to move up to “${LV[u.lvl+1]}”.`;else if(acc>=85)msg=`Great! You are at the top level.`;else msg=`Dictation level stays at “${LV[u.lvl]}”. Get 85%+ in 2 lessons in a row to move up. (You can still go on.)`;save();
