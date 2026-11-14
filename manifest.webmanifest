@@ -1,0 +1,28 @@
+{
+ "name": "English",
+ "short_name": "English",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "background_color": "#FF7A64",
+ "theme_color": "#FF7A64",
+ "lang": "th",
+ "icons": [
+  {
+   "src": "icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ]
+}
